@@ -58,4 +58,5 @@ else
 	else
 		echo "source ${(q-)PWD}/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> ${ZDOTDIR:-$HOME}/.zshrc
 	fi
+  popd
 fi
