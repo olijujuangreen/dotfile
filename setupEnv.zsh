@@ -14,6 +14,27 @@ else
 	eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
+#install neovim
+if ( which nvim >/dev/null 2>&1 ); then
+  echo "neovim already installed"
+else 
+  brew install neovim
+fi
+
+#install bat
+if ( which bat >/dev/null 2>&1 ); then
+  echo "bat already installed"
+else
+  brew install bat
+fi
+
+#install eza
+if ( which eza >/dev/null 2>&1 ); then
+  echo "eza already installed"
+else
+  brew install eza
+fi
+
 #syntax highlighting for terminal
 if [ -f "~/.zsh-packages/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]; then 
   echo "syntax highlighting already installed"
