@@ -1,3 +1,7 @@
+
+#--- ZSH Options ----------#
+autoload -Uz compinit && compinit
+
 #--- Customize Prompts ----------#
 # Set Prompt to show current directory in Bright Yellow
 PROMPT='%B%F{39}┌[%2~]
@@ -10,6 +14,8 @@ RPROMPT='%B%F{39}[%f%b%(?.%F{green}√.%F{red}?%?)%f%B%F{39}]%f%b'
 alias ls="eza"
 alias la="eza -la"
 alias cat="bat"
+alias vim="nvim"
+alias vi="nvim"
 
 #--- Functions  ----------#
 setupRepo ()
@@ -27,4 +33,6 @@ setupRepo ()
   fi
 }
 
-
+#add syntax highlighting for terminal
+#must remain at the bottom of file
+source /Users/olijujuan.green/.zsh-packages/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
