@@ -5,3 +5,8 @@ PROMPT='%B%F{39}┌[%2~]
 
 # Set Right Prompt to show last command status
 RPROMPT='%B%F{39}[%f%b%(?.%F{green}√.%F{red}?%?)%f%B%F{39}]%f%b'
+
+#Aliasing
+alias ls="eza"
+alias la="eza -la"
+alias cat="bat"
