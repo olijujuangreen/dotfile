@@ -10,4 +10,4 @@ Host    personal
  User   git
  AddKeysToAgent yes
  UseKeychain yes
- IdentityFile ~/.ssh/personal_25519
+ IdentityFile ~/.ssh/personal
