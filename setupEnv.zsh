@@ -2,6 +2,7 @@
 
 #setup symbolic links
 ln -s ~/.dotfiles/zshrc ~/.zshrc
+mkdir -p ~/.config/nvim
 ln -s ~/.dotfiles/nvim/init.lua ~/.config/nvim/init.lua     
 
 #install homebrew
@@ -61,13 +62,13 @@ else
 fi
 
 if ( which git >/dev/null 2>&1 ); then 
-git config --global user.name "Olijujuan Green"
-git config --global user.email "117129713+olijujuangreen@users.noreply.github.com"
-git config --global --unset gpg.format
-git config --global gpg.format ssh
-git config --global user.signingKey ~/.ssh/id_ed25519.pub
-git config --global commit.gpgsign true
-echo "Repo configured successfully! 🎉"
+	git config --global user.name "Olijujuan Green"
+	git config --global user.email "117129713+olijujuangreen@users.noreply.github.com"
+	git config --global --unset gpg.format
+	git config --global gpg.format ssh
+	git config --global user.signingKey ~/.ssh/id_ed25519.pub
+	git config --global commit.gpgsign true
+	echo "Repo configured successfully! 🎉"
 else 
-echo "git not installed"
+	echo "git not installed"
 fi
