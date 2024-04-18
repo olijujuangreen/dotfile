@@ -18,21 +18,6 @@ alias vim="nvim"
 alias vi="nvim"
 
 #--- Functions  ----------#
-setupRepo ()
-{
-  if ( which git >/dev/null 2>&1 ); then 
-    git config user.name "Olijujuan Green"
-    git config user.email "117129713+olijujuangreen@users.noreply.github.com"
-    git config --unset gpg.format
-    git config gpg.format ssh
-    git config user.signingKey ~/.ssh/personal_25519.pub
-    git config commit.gpgsign true
-    echo "Repo configured successfully! 🎉"
-  else 
-    echo "git not installed"
-  fi
-}
-
 prune_branches()
 {
 current_branch=$(git symbolic-ref --short HEAD)
