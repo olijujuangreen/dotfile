@@ -55,4 +55,4 @@ done
 
 #add syntax highlighting for terminal
 #must remain at the bottom of file
-source /Users/olijujuan.green/.zsh-packages/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source /Users/olijujuangreen/.zsh-packages/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh

@@ -1,7 +1,6 @@
 #!/usr/bin zsh
 
 #setup symbolic links
-ln -s ~/.dotfiles/ssh/config ~/.ssh/config  
 ln -s ~/.dotfiles/zshrc ~/.zshrc
 ln -s ~/.dotfiles/nvim/init.lua ~/.config/nvim/init.lua     
 
@@ -10,7 +9,7 @@ if ( which brew >/dev/null 2>&1 ); then
 	echo "homebrew already installed"
 else 	
 	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-	(echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> /Users/olijujuan.green/.zprofile
+	(echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> /Users/olijujuangreen/.zprofile
 	eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
