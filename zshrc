@@ -20,22 +20,57 @@ alias vi="nvim"
 #--- Functions  ----------#
 prune_branches()
 {
-current_branch=$(git symbolic-ref --short HEAD)
-if [ $current_branch != "main" ] && [ $current_branch != "master" ]; then
-    echo "You must be on main or master to prune branches"
-    exit 1
-fi
+  local current_branch branch upstream_status
+  local deleted=0
 
-for branch in $(git branch --format="%(refname:short)"); do
-    #if branch is merged into current branch
-    if [ "$branch" != "master" ] && [ "$branch" != "main" ] && ! git log --oneline --no-merges master..$branch | grep -q "$branch"; then
-        # if branch has been deleted on GitHub
-        if ! git ls-remote --heads origin "$branch" &> /dev/null; then
-            git branch -d "$branch"
-            echo "Deleted local branch: $branch"
-        fi
+  if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    echo "Not inside a Git repository"
+    return 1
+  fi
+
+  current_branch=$(git branch --show-current)
+  if [[ -z "$current_branch" ]]; then
+    echo "Cannot prune branches from a detached HEAD"
+    return 1
+  fi
+
+  if [[ "$current_branch" != "main" && "$current_branch" != "master" ]]; then
+    echo "You must be on main or master to prune branches"
+    return 1
+  fi
+
+  if [[ -z "$(git remote)" ]]; then
+    echo "No Git remotes are configured"
+    return 1
+  fi
+
+  echo "Fetching and pruning remotes..."
+  if ! git fetch --all --prune; then
+    echo "Unable to fetch remotes; no local branches were deleted"
+    return 1
+  fi
+
+  while IFS=$'\t' read -r branch upstream_status; do
+    [[ "$branch" == "$current_branch" ]] && continue
+
+    # Only remove branches merged into the current branch whose upstream was
+    # deleted from its remote. Branches without an upstream are left alone.
+    if [[ "$upstream_status" == "[gone]" ]]; then
+      if git branch -d -- "$branch"; then
+        echo "Deleted local branch: $branch"
+        ((deleted += 1))
+      fi
     fi
-done
+  done < <(git for-each-ref \
+    --merged="$current_branch" \
+    --format='%(refname:short)%09%(upstream:track)' \
+    refs/heads/)
+
+  if (( deleted == 0 )); then
+    echo "No merged branches with deleted upstreams found"
+  else
+    echo "Pruned $deleted local branch(es)"
+  fi
 }
 
 #add syntax highlighting for terminal
