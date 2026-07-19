@@ -73,6 +73,16 @@ prune_branches()
   fi
 }
 
-#add syntax highlighting for terminal
-#must remain at the bottom of file
-source /Users/olijujuangreen/.zsh-packages/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+# Add syntax highlighting for the terminal. This must remain at the bottom so
+# it can wrap all widgets created above it.
+for syntax_highlighting_file in \
+  /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh \
+  /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh \
+  "$HOME/.zsh-packages/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+do
+  if [[ -r "$syntax_highlighting_file" ]]; then
+    source "$syntax_highlighting_file"
+    break
+  fi
+done
+unset syntax_highlighting_file

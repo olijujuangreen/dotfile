@@ -1,74 +1,91 @@
-#!/usr/bin zsh
+#!/usr/bin/env zsh
 
-#setup symbolic links
-ln -s ~/.dotfiles/zshrc ~/.zshrc
-mkdir -p ~/.config/nvim
-ln -s ~/.dotfiles/nvim/init.lua ~/.config/nvim/init.lua     
+set -e
 
-#install homebrew
-if ( which brew >/dev/null 2>&1 ); then
-	echo "homebrew already installed"
-else 	
-	/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-	(echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> /Users/olijujuangreen/.zprofile
-	eval "$(/opt/homebrew/bin/brew shellenv)"
+DOTFILES_DIR=${0:A:h}
+
+link_config()
+{
+  local source_path=$1
+  local destination_path=$2
+
+  if [[ -L "$destination_path" ]]; then
+    if [[ "${destination_path:A}" == "${source_path:A}" ]]; then
+      echo "Already linked: $destination_path"
+      return
+    fi
+
+    ln -sfn "$source_path" "$destination_path"
+    echo "Updated link: $destination_path -> $source_path"
+  elif [[ -e "$destination_path" ]]; then
+    echo "Refusing to replace existing file: $destination_path"
+    echo "Move it aside, then run this script again."
+    return 1
+  else
+    ln -s "$source_path" "$destination_path"
+    echo "Linked: $destination_path -> $source_path"
+  fi
+}
+
+# Link configuration files from wherever this repository was cloned.
+link_config "$DOTFILES_DIR/zshrc" "$HOME/.zshrc"
+mkdir -p "$HOME/.config/nvim"
+link_config "$DOTFILES_DIR/nvim/init.lua" "$HOME/.config/nvim/init.lua"
+
+# Install Homebrew when necessary, then ensure it is available in this shell
+# and future login shells on either Apple Silicon or Intel Macs.
+if ! command -v brew >/dev/null 2>&1; then
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
-#install neovim
-if ( which nvim >/dev/null 2>&1 ); then
-  echo "neovim already installed"
-else 
-  brew install neovim
-fi
-
-#install bat
-if ( which bat >/dev/null 2>&1 ); then
-  echo "bat already installed"
+if [[ -x /opt/homebrew/bin/brew ]]; then
+  brew_bin=/opt/homebrew/bin/brew
+elif [[ -x /usr/local/bin/brew ]]; then
+  brew_bin=/usr/local/bin/brew
 else
-  brew install bat
+  brew_bin=$(command -v brew)
 fi
 
-#install eza
-if ( which eza >/dev/null 2>&1 ); then
-  echo "eza already installed"
+brew_init="eval \"\$($brew_bin shellenv)\""
+touch "$HOME/.zprofile"
+if ! grep -Fqx "$brew_init" "$HOME/.zprofile"; then
+  echo "$brew_init" >> "$HOME/.zprofile"
+fi
+eval "$($brew_bin shellenv)"
+
+packages=()
+command -v nvim >/dev/null 2>&1 || packages+=(neovim)
+command -v bat >/dev/null 2>&1 || packages+=(bat)
+command -v eza >/dev/null 2>&1 || packages+=(eza)
+$brew_bin list --formula zsh-syntax-highlighting >/dev/null 2>&1 || packages+=(zsh-syntax-highlighting)
+
+if (( ${#packages[@]} > 0 )); then
+  $brew_bin install "${packages[@]}"
 else
-  brew install eza
+  echo "Shell tools are already installed"
 fi
 
-#syntax highlighting for terminal
-if [ -f "~/.zsh-packages/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]; then 
-  echo "syntax highlighting already installed"
-else
-	if [ -d "~/.zsh-packages" ]; then
-		echo "zsh packages directory already exists"
-	else 
-		mkdir ~/.zsh-packages
-	fi
+# Configure Git identity and SSH commit signing when a public key is present.
+if command -v git >/dev/null 2>&1; then
+  git config --global user.name "Olijujuan Green"
+  git config --global user.email "117129713+olijujuangreen@users.noreply.github.com"
 
-	pushd ~/.zsh-packages 
-	
-	if [ -d "zsh-syntax-highlighting" ]; then
-		echo "syntax highlighting package already cloned"
-	else 
-		git clone https://github.com/zsh-users/zsh-syntax-highlighting.git
-	fi
+  signing_key=""
+  for key_path in "$HOME/.ssh/id_ed25519_github.pub" "$HOME/.ssh/id_ed25519.pub"; do
+    if [[ -f "$key_path" ]]; then
+      signing_key=$key_path
+      break
+    fi
+  done
 
-	if ( cat ${ZDOTDIR:-$HOME}/.zshrc | grep "source ${(q-)PWD}/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ); then
-		echo "source file already added"
-	else
-		echo "source ${(q-)PWD}/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> ${ZDOTDIR:-$HOME}/.zshrc
-	fi
-  popd
+  if [[ -n "$signing_key" ]]; then
+    git config --global gpg.format ssh
+    git config --global user.signingKey "$signing_key"
+    git config --global commit.gpgsign true
+    echo "Git configured with SSH commit signing"
+  else
+    echo "No SSH public key found; commit signing was not enabled"
+  fi
 fi
 
-if ( which git >/dev/null 2>&1 ); then 
-	git config --global user.name "Olijujuan Green"
-	git config --global user.email "117129713+olijujuangreen@users.noreply.github.com"
-	git config --global --unset gpg.format
-	git config --global gpg.format ssh
-	git config --global user.signingKey ~/.ssh/id_ed25519.pub
-	git config --global commit.gpgsign true
-	echo "Repo configured successfully! 🎉"
-else 
-	echo "git not installed"
-fi
+echo "Environment setup complete. Run: source ~/.zshrc"
